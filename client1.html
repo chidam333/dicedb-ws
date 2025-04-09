@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Form</title>
+        <!-- Added CDN link for socket.io client -->
+        <script
+            src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+        ></script>
+        <script>
+            const socket = io("http://localhost:3002");
+            console.log({socket});
+            socket.on("connect", () => {
+                console.log("Connected to server");
+            });
+            socket.on("message", (msg) => {
+                console.log("Message from server: " + msg);
+            });
+        </script>
+    </head>
+    <body>
+        <h1>Hello World</h1>
+        <div id="chat">
+            <!-- Chat messages display -->
+            <div id="messages"></div>
+            <!-- Chat input area -->
+            <input type="text" id="messageInput" placeholder="Type your message">
+            <button id="sendBtn">Send</button>
+        </div>
+        <script>
+            // Send message on button click
+            document.getElementById("sendBtn").addEventListener("click", () => {
+                const input = document.getElementById("messageInput");
+                const msg = input.value;
+                if (msg) {
+                    socket.emit("message", msg);
+                    input.value = "";
+                }
+            });
+            // Add keypress event listener for Enter key
+            document.getElementById("messageInput").addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    document.getElementById("sendBtn").click();
+                }
+            });
+            // Display incoming messages
+            socket.on("message", (msg) => {
+                console.log({msg});
+                const messagesDiv = document.getElementById("messages");
+                const messageElem = document.createElement("div");
+                messageElem.textContent = msg;
+                messagesDiv.appendChild(messageElem);
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "dicedb-ws",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run index.ts",
+    "build": "bun build index.ts --outdir=dist --minify",
+    "test": "bun test",
+    "lint": "bun run eslint .",
+    "format": "bun run prettier . --write"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "dicedb-sdk": "^1.1.2",
+    "socket.io": "^4.8.1"
+  }
+}

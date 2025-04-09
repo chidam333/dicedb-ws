@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Client 2</title>
+        <!-- CDN for socket.io client -->
+        <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+        <script>
+            const socket = io("http://localhost:3002");
+            socket.on("connect", () => {
+                console.log("Client 2 connected to server");
+            });
+            socket.on("message", (msg) => {
+                console.log("Message from server: " + msg);
+            });
+        </script>
+    </head>
+    <body>
+        <h1>Client 2 Chat</h1>
+        <div id="chat">
+            <div id="messages"></div>
+            <input type="text" id="messageInput" placeholder="Type your message">
+            <button id="sendBtn">Send</button>
+        </div>
+        <script>
+            document.getElementById("sendBtn").addEventListener("click", () => {
+                const input = document.getElementById("messageInput");
+                if (input.value) {
+                    socket.emit("message", input.value);
+                    input.value = "";
+                }
+            });
+            // Add keypress event listener for Enter key
+            document.getElementById("messageInput").addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    document.getElementById("sendBtn").click();
+                }
+            });
+            socket.on("message", (msg) => {
+                const messagesDiv = document.getElementById("messages");
+                const messageElem = document.createElement("div");
+                messageElem.textContent = msg;
+                messagesDiv.appendChild(messageElem);
+            });
+        </script>
+    </body>
+</html>
