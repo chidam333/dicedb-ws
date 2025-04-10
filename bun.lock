@@ -4,7 +4,7 @@
     "": {
       "name": "dicedb-ws",
       "dependencies": {
-        "dicedb-sdk": "^1.1.2",
+        "dicedb-sdk": "1.1.3",
         "socket.io": "^4.8.1",
       },
       "devDependencies": {
@@ -40,7 +40,7 @@
 
     "debug": ["debug@4.3.7", "", { "dependencies": { "ms": "^2.1.3" } }, "sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ=="],
 
-    "dicedb-sdk": ["dicedb-sdk@1.1.2", "", { "dependencies": { "@bufbuild/protobuf": "^2.2.5", "google-protobuf": "^3.21.4" }, "peerDependencies": { "typescript": "^5" } }, "sha512-my0mXTWkBxndyup7GwAaAOW+6gdOh4jYgHsWQIQXXclaB+lVhb72d8BP3fea9gbUwhabAkCct6eJfG0xd+sZLw=="],
+    "dicedb-sdk": ["dicedb-sdk@1.1.3", "", { "dependencies": { "@bufbuild/protobuf": "^2.2.5", "google-protobuf": "^3.21.4" }, "peerDependencies": { "typescript": "^5" } }, "sha512-+I6Awwh8zWTgr2V78hetTKGEVsEBQkMHQSR0ZjE1l74PJ+oQ8yDb2J/MrsXpL8431290Z15VBBYZNEarp23nhQ=="],
 
     "engine.io": ["engine.io@6.6.4", "", { "dependencies": { "@types/cors": "^2.8.12", "@types/node": ">=10.0.0", "accepts": "~1.3.4", "base64id": "2.0.0", "cookie": "~0.7.2", "cors": "~2.8.5", "debug": "~4.3.1", "engine.io-parser": "~5.2.1", "ws": "~8.17.1" } }, "sha512-ZCkIjSYNDyGn0R6ewHDtXgns/Zre/NT6Agvq1/WobF7JXgFff4SeDroKiCO3fNJreU9YG429Sc81o4w5ok/W5g=="],
 

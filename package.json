@@ -17,7 +17,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "dicedb-sdk": "^1.1.2",
+    "dicedb-sdk": "1.1.3",
     "socket.io": "^4.8.1"
   }
 }
