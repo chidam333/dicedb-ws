@@ -1,7 +1,11 @@
 import { Server } from "socket.io";
-import { NewClient, wire, cmd } from "dicedb-sdk";
+import { NewClient, wire, cmd, type Client } from "dicedb-sdk";
 
+//Creating a socket server
 const io = new Server(3002, { cors: { origin: "*" } });
+
+
+// Creating two dicedb client (so that we can watch 2 different keys0)
 const { response: client, error } = await NewClient("localhost", 7379);
 const { response: client2, error: error2 } = await NewClient("localhost", 7379);
 if (!client || error) {
@@ -12,7 +16,16 @@ if (!client2 || error2) {
     console.error("Client2 couldn't be created", { error2 });
     throw new Error("Client2 couldn't be created");
 }
-// console.log({ client, client2 });
+
+
+
+
+
+
+
+
+
+// Serving static files client1 and client2
 const server = Bun.serve({
     port: 3333,
     fetch(req) {
@@ -37,8 +50,13 @@ const server = Bun.serve({
 
 console.log(`Listening on http://localhost:${server.port}`);
 
-let serialCounter = 1;
-const socketSerialMap = new Map<string, string>();
+
+
+
+
+
+
+
 
 async function processIterator(iterator: AsyncIterable<any>) {
     console.log("\x1b[32mIterator processing started\x1b[0m");
@@ -54,10 +72,19 @@ async function processIterator(iterator: AsyncIterable<any>) {
     }
 }
 
+
+
+
+
+
+// socket logic
+let serialCounter = 1;
+const socketSerialMap = new Map<string, string>();
+const socketClientMap = new Map<string, Client>();
 io.on("connection", async (socket) => {
-    // assign serial number to the connected socket
     const serialNumber = String(serialCounter++);
     socketSerialMap.set(socket.id, serialNumber);
+    socketClientMap.set(socket.id, client);
     if(!client.watchIterator){
         const { response:getWatch, error:getWatchError } = await client.FireString(`GET.WATCH ${serialNumber}`);
         if (getWatchError) {
@@ -91,12 +118,16 @@ io.on("connection", async (socket) => {
 
     socket.on("disconnect", () => {
         socketSerialMap.delete(socket.id);
+        const clientForSocket = socketClientMap.get(socket.id);
+        if(clientForSocket){
+            clientForSocket.Fire(wire.command({ cmd: cmd.UNWATCH, args: [socketSerialMap.get(socket.id)] }));
+            clientForSocket.watchIterator = null
+        }
         console.log("A user disconnected, serial", serialNumber);
     });
     socket.on("message", async (msg) => {
         // get the assigned serial number for logging
         const serial = socketSerialMap.get(socket.id) ?? "unknown";
-        console.log({serial,socketId:socket.id}, `inside message \n\n${msg}`);
         const { response, error } = await client.Fire(wire.command({ cmd: cmd.SET, args: [serial, `${serial}:${msg}`] }));
         if (error) {
             console.error("Error sending message:", error);
