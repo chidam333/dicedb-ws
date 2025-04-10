@@ -4,7 +4,6 @@ import { NewClient, wire, cmd, type Client } from "dicedb-sdk";
 //Creating a socket server
 const io = new Server(3002, { cors: { origin: "*" } });
 
-
 // Creating two dicedb client (so that we can watch 2 different keys0)
 const { response: client, error } = await NewClient("localhost", 7379);
 const { response: client2, error: error2 } = await NewClient("localhost", 7379);
@@ -17,19 +16,19 @@ if (!client2 || error2) {
     throw new Error("Client2 couldn't be created");
 }
 
-
-
-
-
-
-
-
-
 // Serving static files client1 and client2
 const server = Bun.serve({
     port: 3333,
     fetch(req) {
         const url = new URL(req.url);
+        if (url.pathname === "/") {
+            return new Response(Bun.file("index.html"), {
+                headers: {
+                    "Content-Type": "text/html",
+                },
+            });
+        }
+
         if (url.pathname === "/client1") {
             return new Response(Bun.file("client1.html"), {
                 headers: {
@@ -50,14 +49,6 @@ const server = Bun.serve({
 
 console.log(`Listening on http://localhost:${server.port}`);
 
-
-
-
-
-
-
-
-
 async function processIterator(iterator: AsyncIterable<any>) {
     console.log("\x1b[32mIterator processing started\x1b[0m");
     try {
@@ -72,11 +63,6 @@ async function processIterator(iterator: AsyncIterable<any>) {
     }
 }
 
-
-
-
-
-
 // socket logic
 let serialCounter = 1;
 const socketSerialMap = new Map<string, string>();
@@ -85,11 +71,12 @@ io.on("connection", async (socket) => {
     const serialNumber = String(serialCounter++);
     socketSerialMap.set(socket.id, serialNumber);
     socketClientMap.set(socket.id, client);
-    if(!client.watchIterator){
-        const { response:getWatch, error:getWatchError } = await client.FireString(`GET.WATCH ${serialNumber}`);
+    if (!client.watchIterator) {
+        const { response: getWatch, error: getWatchError } = await client.FireString(`GET.WATCH ${serialNumber}`);
         if (getWatchError) {
             return console.error("Error getting watch:", { getWatchError });
-        }if (getWatch) {
+        }
+        if (getWatch) {
             console.log("Watch set successfully", serialNumber, getWatch.value);
         }
         const { response: iterator, error: itrError } = await client.WatchChGetter(client);
@@ -98,12 +85,12 @@ io.on("connection", async (socket) => {
         }
         console.log("Iterator fetched successfully");
         processIterator(iterator);
-    }
-    else if (!client2.watchIterator){
-        const { response:getWatch, error:getWatchError } = await client2.FireString(`GET.WATCH ${serialNumber}`);
+    } else if (!client2.watchIterator) {
+        const { response: getWatch, error: getWatchError } = await client2.FireString(`GET.WATCH ${serialNumber}`);
         if (getWatchError) {
             return console.error("Error getting watch:", { getWatchError });
-        }if (getWatch) {
+        }
+        if (getWatch) {
             console.log("Watch set successfully", serialNumber, getWatch.value);
         }
         const { response: iterator, error: itrError } = await client2.WatchChGetter(client2);
@@ -112,23 +99,24 @@ io.on("connection", async (socket) => {
         }
         console.log("Iterator fetched successfully");
         processIterator(iterator);
-
     }
     console.log("Active Users :", socketSerialMap);
 
     socket.on("disconnect", () => {
         socketSerialMap.delete(socket.id);
         const clientForSocket = socketClientMap.get(socket.id);
-        if(clientForSocket){
+        if (clientForSocket) {
             clientForSocket.Fire(wire.command({ cmd: cmd.UNWATCH, args: [socketSerialMap.get(socket.id)] }));
-            clientForSocket.watchIterator = null
+            clientForSocket.watchIterator = null;
         }
         console.log("A user disconnected, serial", serialNumber);
     });
     socket.on("message", async (msg) => {
         // get the assigned serial number for logging
         const serial = socketSerialMap.get(socket.id) ?? "unknown";
-        const { response, error } = await client.Fire(wire.command({ cmd: cmd.SET, args: [serial, `${serial}:${msg}`] }));
+        const { response, error } = await client.Fire(
+            wire.command({ cmd: cmd.SET, args: [serial, `${serial}:${msg}`] })
+        );
         if (error) {
             console.error("Error sending message:", error);
         }
